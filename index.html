@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>POKER-IN · Capsa Banting VVIP</title>
+  <style>
+    :root {
+      --bg: #073854;
+      --bg2: #031926;
+      --gold: #f6c967;
+      --gold-dark: #a8741a;
+      --felt: #165b49;
+      --felt-light: #228268;
+      --wood: #3e1f11;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px);
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background: radial-gradient(circle at 50% 40%, var(--bg), var(--bg2));
+      overflow: hidden;
+      font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+      color: #fff;
+      user-select: none;
+    }
+
+    #wrap {
+      position: fixed;
+      inset: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px) 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #stage {
+      width: 1200px;
+      height: 540px;
+      position: relative;
+      flex: none;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 45%, #0c4b6e 0%, #052236 65%, #02101a 100%);
+      box-shadow: 0 0 60px #000d;
+    }
+    /* Subtle ambient rotating rays */
+    #stage:before {
+      content: "";
+      position: absolute;
+      inset: -250px;
+      background: conic-gradient(
+        from 0deg at 50% 48%,
+        #ffffff06 0deg 15deg, #0000 15deg 30deg,
+        #00000014 30deg 45deg, #0000 45deg 60deg,
+        #ffffff06 60deg 75deg, #0000 75deg 90deg,
+        #00000014 90deg 105deg, #0000 105deg 120deg,
+        #ffffff06 120deg 135deg, #0000 135deg 150deg,
+        #00000014 150deg 165deg, #0000 165deg 180deg,
+        #ffffff06 180deg 195deg, #0000 195deg 210deg,
+        #00000014 210deg 225deg, #0000 225deg 240deg,
+        #ffffff06 240deg 255deg, #0000 255deg 270deg,
+        #00000014 270deg 285deg, #0000 285deg 300deg,
+        #ffffff06 300deg 315deg, #0000 315deg 330deg,
+        #00000014 330deg 345deg, #0000 345deg 360deg
+      );
+      animation: spinRays 100s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes spinRays {
+      to { transform: rotate(360deg); }
+    }
+
+    .abs {
+      position: absolute;
+    }
+
+    /* ==================== GAME TABLE & FELT ==================== */
+    #table {
+      left: 135px;
+      top: 56px;
+      width: 930px;
+      height: 364px;
+      border-radius: 182px;
+      border: 14px solid var(--wood);
+      outline: 4px solid var(--gold);
+      background: radial-gradient(ellipse at 50% 45%, var(--felt-light) 0%, var(--felt) 58%, #0d3b2f 100%);
+      box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.75),
+        inset 0 0 0 4px var(--gold-dark),
+        inset 0 0 55px rgba(0, 0, 0, 0.65);
+    }
+    #ring {
+      left: 255px;
+      top: 102px;
+      width: 690px;
+      height: 266px;
+      border-radius: 133px;
+      border: 2px dashed rgba(246, 201, 103, 0.28);
+      pointer-events: none;
+    }
+    #tableBrand {
+      left: 600px;
+      top: 142px;
+      transform: translateX(-50%);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 5px;
+      color: rgba(255, 255, 255, 0.14);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #suits {
+      left: 535px;
+      top: 40px;
+      width: 130px;
+      background: #141c2e;
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      padding: 2px 8px;
+      text-align: center;
+      letter-spacing: 5px;
+      font-size: 15px;
+      box-shadow: 0 4px 10px #0008;
+    }
+    #suits span.r { color: #ff5252; }
+    #suits span.k { color: #e2e8f0; }
+
+    /* Top HUD */
+    .top {
+      font-weight: 800;
+      font-size: 19px;
+      text-shadow: 0 2px 4px #0009;
+    }
+    #lobi {
+      left: 18px;
+      top: 10px;
+      padding: 7px 24px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #3b6fd8, #1e40af);
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.6px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px #0006;
+      transition: transform 0.15s, filter 0.15s;
+    }
+    #lobi:hover {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+    }
+    #tname {
+      left: 150px;
+      top: 11px;
+      background: rgba(0, 0, 0, 0.42);
+      border: 1px solid rgba(246, 201, 103, 0.35);
+      padding: 5px 18px;
+      border-radius: 16px;
+      font-size: 16px;
+      color: #fde68a;
+    }
+    .hud-right {
+      right: 64px;
+      top: 11px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 5px 16px;
+      border-radius: 16px;
+      font-size: 15px;
+    }
+    #timer {
+      color: #38bdf8;
+      font-weight: 900;
+    }
+    #timer.warn {
+      color: #ff5252;
+      animation: pulseText 0.6s infinite;
+    }
+    @keyframes pulseText {
+      50% { opacity: 0.45; }
+    }
+    #bSnd {
+      right: 14px;
+      top: 9px;
+      z-index: 30;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      font-size: 17px;
+      cursor: pointer;
+      color: #fff;
+      transition: transform 0.15s;
+    }
+    #bSnd:hover {
+      transform: scale(1.08);
+    }
+
+    /* ==================== PLAYER AVATARS & CARD BACKS ==================== */
+    .av {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 4px solid var(--gold);
+      background: radial-gradient(circle at 30% 30%, #e0f2fe, #7dd3fc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .av.on {
+      border-color: #fff;
+      box-shadow: 0 0 0 4px #fde047, 0 0 28px 6px #facc15;
+      transform: scale(1.08);
+    }
+    .lb {
+      text-align: center;
+      font-weight: 800;
+      font-size: 14px;
+      background: rgba(8, 18, 34, 0.82);
+      border: 1px solid rgba(246, 201, 103, 0.4);
+      border-radius: 12px;
+      padding: 2px 10px;
+      margin-top: 4px;
+      text-shadow: 0 1px 2px #000;
+      white-space: nowrap;
+      width: 144px;
+      margin-left: -36px;
+      box-shadow: 0 3px 8px #0006;
+    }
+    .bk {
+      width: 132px;
+      height: 62px;
+      border-radius: 10px;
+      border: 2.5px solid #fff;
+      background:
+        radial-gradient(circle, rgba(246, 201, 103, 0.25) 2px, transparent 2.5px) 0 0 / 12px 12px,
+        linear-gradient(135deg, #1e3a8a, #172554);
+      box-shadow: 3px 3px 0 #0f172a, 5px 5px 0 #cbd5e1, 0 8px 16px #0007;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .bk span {
+      background: rgba(0, 0, 0, 0.78);
+      border: 1.5px solid var(--gold);
+      color: #fde047;
+      border-radius: 14px;
+      padding: 2px 14px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    /* ==================== ACTION BUTTONS ==================== */
+    .btn {
+      width: 146px;
+      height: 44px;
+      border-radius: 22px;
+      border: 2.5px solid rgba(255, 255, 255, 0.35);
+      font: 800 15px "Trebuchet MS", sans-serif;
+      letter-spacing: 0.5px;
+      color: #fff;
+      cursor: pointer;
+      background: #334155;
+      opacity: 0.45;
+      text-shadow: 0 2px 2px #0008;
+      transition: transform 0.15s, opacity 0.2s, filter 0.15s;
+    }
+    .btn.ok {
+      opacity: 1;
+      border-color: #fff;
+    }
+    .btn.ok:hover {
+      filter: brightness(1.12);
+      transform: translateY(-2px);
+    }
+    .btn.ok:active {
+      transform: translateY(2px);
+    }
+    #bSort {
+      background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+      opacity: 1;
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+    #bPlay.ok {
+      background: linear-gradient(180deg, #fbbf24, #d97706);
+      color: #271300;
+      text-shadow: none;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45);
+    }
+    #bPass.ok {
+      background: linear-gradient(180deg, #f87171, #b91c1c);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+    }
+
+    /* ==================== CENTER PILE & COMBO PREVIEW ==================== */
+    #pile {
+      left: 440px;
+      width: 320px;
+      top: 164px;
+      height: 102px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #who {
+      left: 420px;
+      width: 360px;
+      top: 266px;
+      text-align: center;
+      font-weight: 800;
+      color: #fde68a;
+      font-size: 15px;
+      text-shadow: 0 2px 4px #000;
+    }
+    #msg {
+      left: 330px;
+      width: 540px;
+      top: 294px;
+      text-align: center;
+      font-weight: 800;
+      font-size: 15px;
+      color: #fff;
+      text-shadow: 0 2px 4px #000;
+    }
+    #comboHint {
+      left: 600px;
+      top: 332px;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.72);
+      border: 1.5px solid var(--gold);
+      color: #fde047;
+      padding: 3px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 800;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #comboHint.on {
+      opacity: 1;
+    }
+
+    /* ==================== PLAYING CARDS ==================== */
+    #hand {
+      left: 270px;
+      top: 422px;
+      width: 700px;
+      height: 118px;
+      display: flex;
+    }
+    .card {
+      width: 82px;
+      height: 114px;
+      background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      position: relative;
+      flex: none;
+      box-shadow: -2px 3px 8px rgba(0, 0, 0, 0.45);
+      transition: transform 0.14s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.14s;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    #hand .card {
+      margin-left: -32px;
+      cursor: pointer;
+    }
+    #hand .card:first-child {
+      margin-left: 0;
+    }
+    #hand .card:hover {
+      transform: translateY(-8px);
+    }
+    #hand .card.sel {
+      transform: translateY(-24px);
+      box-shadow: 0 0 0 3px #facc15, 0 10px 20px rgba(0, 0, 0, 0.65);
+    }
+    .card.r { color: #dc2626; }
+    .card.k { color: #0f172a; }
+    .card b {
+      position: absolute;
+      left: 7px;
+      top: 3px;
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: -1px;
+    }
+    .card i {
+      position: absolute;
+      left: 9px;
+      top: 33px;
+      font-style: normal;
+      font-size: 19px;
+    }
+    .card u {
+      position: absolute;
+      right: 8px;
+      bottom: 4px;
+      text-decoration: none;
+      font-size: 48px;
+      line-height: 1;
+      opacity: 0.92;
+    }
+    #pile .card {
+      margin-left: -26px;
+      zoom: 0.82;
+    }
+    #pile .card:first-child {
+      margin-left: 0;
+    }
+
+    /* ==================== MODALS & OVERLAYS ==================== */
+    #ov, #cv {
+      display: none;
+      position: absolute;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+    }
+    #ov {
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(4px);
+      z-index: 25;
+    }
+    #cv {
+      z-index: 22;
+      flex-direction: column;
+      text-align: center;
+      background: linear-gradient(var(--bg2), #021a2a);
+    }
+    #cv h2 { font-size: 38px; margin: 0 0 8px; color: #ffd24a; }
+    #cv p { margin: 0 0 18px; font-size: 18px; }
+    #cv .btn, #ov .btn {
+      width: 210px;
+      opacity: 1;
+      background: linear-gradient(180deg, #fbbf24, #d97706);
+      color: #271300;
+      border-color: #fff;
+    }
+    #ov > div {
+      animation: pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+      background: linear-gradient(180deg, #16294a, #0b162b);
+      border: 3px solid var(--gold);
+      border-radius: 22px;
+      padding: 28px 46px;
+      text-align: center;
+      min-width: 340px;
+      box-shadow: 0 20px 50px #000c;
+    }
+    #ov h2 {
+      margin: 0 0 12px;
+      font-size: 32px;
+      color: #fde047;
+    }
+    #ov p {
+      margin: 6px 0;
+      font-size: 17px;
+      color: #e2e8f0;
+    }
+    #ov .btn {
+      display: block;
+      margin: 14px auto 0;
+    }
+    #ov #bLobby {
+      background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+      color: #fff;
+    }
+    #ov > div.lose {
+      border-color: #ef4444;
+      animation: pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1), sh 0.5s 0.45s;
+    }
+    #ov > div.lose h2 {
+      color: #f87171;
+    }
+    .shake {
+      animation: sh 0.3s;
+    }
+    @keyframes sh {
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    /* ==================== ENHANCED VIP LOBBY ==================== */
+    #lobby {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 50% 32%, #0e567d 0%, #06283d 58%, #02111b 100%);
+      overflow: hidden;
+    }
+    .lob-bg-cards {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .lob-fcard {
+      position: absolute;
+      width: 54px;
+      height: 76px;
+      border-radius: 8px;
+      background: #fff;
+      border: 2px solid #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Georgia, serif;
+      font-weight: 900;
+      font-size: 20px;
+      opacity: 0.11;
+      animation: floatCard linear infinite;
+    }
+    @keyframes floatCard {
+      0% { transform: translateY(580px) rotate(0deg); }
+      100% { transform: translateY(-120px) rotate(360deg); }
+    }
+
+    .lob-header {
+      text-align: center;
+      z-index: 2;
+      margin-bottom: 10px;
+    }
+    .lob-badge {
+      display: inline-block;
+      background: rgba(246, 201, 103, 0.16);
+      border: 1px solid rgba(246, 201, 103, 0.55);
+      color: #fde68a;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      padding: 3px 14px;
+      border-radius: 14px;
+      margin-bottom: 4px;
+    }
+    #lobby h1 {
+      margin: 0;
+      font-size: 52px;
+      letter-spacing: 3px;
+      background: linear-gradient(180deg, #fff3b0 0%, #f6c967 50%, #c88a1e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 0 #5c3705) drop-shadow(0 10px 18px rgba(0, 0, 0, 0.7));
+    }
+
+    /* Player Profile & Opponent Bar */
+    .lob-setup {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(8, 22, 42, 0.65);
+      border: 1.5px solid rgba(246, 201, 103, 0.35);
+      border-radius: 20px;
+      padding: 10px 22px;
+      backdrop-filter: blur(8px);
+      z-index: 2;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+    .prof-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 18px;
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .prof-av {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 2.5px solid var(--gold);
+      background: #bae6fd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .prof-av:hover {
+      transform: scale(1.1) rotate(-6deg);
+    }
+    .prof-in {
+      width: 130px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.45);
+      color: #fff;
+      font: 800 15px "Trebuchet MS", sans-serif;
+      outline: none;
+    }
+    .prof-in:focus {
+      border-color: var(--gold);
+    }
+
+    .ps {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #e2e8f0;
+    }
+    .pn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(255, 255, 255, 0.3);
+      background: #1e3a6e;
+      color: #fff;
+      font: 900 18px "Trebuchet MS", sans-serif;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .pn:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold);
+    }
+    .pn.on {
+      background: linear-gradient(180deg, #fbbf24, #d97706);
+      color: #271300;
+      border-color: #fff;
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.55);
+    }
+    #pcap {
+      margin: 7px 0 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #bae6fd;
+      z-index: 2;
+    }
+
+    /* Room Cards Grid */
+    #rooms {
+      display: grid;
+      grid-template-columns: repeat(2, 370px);
+      gap: 14px;
+      z-index: 2;
+    }
+    .room {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+      padding: 13px 18px;
+      border-radius: 18px;
+      border: 2px solid rgba(246, 201, 103, 0.65);
+      background: linear-gradient(135deg, rgba(30, 58, 110, 0.9), rgba(15, 31, 64, 0.95));
+      color: #fff;
+      font: 600 14px "Trebuchet MS", sans-serif;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+      transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+      position: relative;
+      overflow: hidden;
+    }
+    .room:hover {
+      transform: translateY(-3px);
+      border-color: #fff;
+      box-shadow: 0 12px 26px rgba(246, 201, 103, 0.3);
+    }
+    .room-ico {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(246, 201, 103, 0.16);
+      border: 1.5px solid rgba(246, 201, 103, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex: none;
+    }
+    .room-info {
+      flex: 1;
+    }
+    .room-info strong {
+      display: block;
+      font-size: 18px;
+      color: #fde047;
+      letter-spacing: 0.4px;
+    }
+    .room-info span {
+      display: block;
+      font-size: 12.5px;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+    .room-go {
+      background: linear-gradient(180deg, #34d399, #059669);
+      color: #022c22;
+      font-weight: 900;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Lobby Bottom Corner */
+    .tg {
+      padding: 8px 18px;
+      border-radius: 18px;
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      background: rgba(15, 31, 64, 0.85);
+      color: #fff;
+      font: 700 14px "Trebuchet MS", sans-serif;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: background 0.15s;
+    }
+    .tg:hover {
+      background: rgba(37, 68, 130, 0.95);
+    }
+    #abt {
+      position: absolute;
+      left: 22px;
+      bottom: 16px;
+      z-index: 5;
+    }
+    #abtp {
+      display: none;
+      position: absolute;
+      left: 0;
+      bottom: 46px;
+      width: 470px;
+      background: #0d1b36;
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      text-align: left;
+      box-shadow: 0 14px 35px #000c;
+    }
+    .tc {
+      display: none;
+      margin: 10px 0 4px;
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      color: #e2e8f0;
+    }
+    .tc a {
+      color: #fde047;
+      font-weight: 800;
+    }
+
+    /* Animations */
+    #pile.fly .card {
+      animation: drop 0.4s cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+    @keyframes drop {
+      from { transform: translate(var(--dx), var(--dy)) rotate(25deg) scale(1.2); opacity: 0; }
+      to { transform: none; opacity: 1; }
+    }
+    #hand.deal .card {
+      animation: deal 0.5s backwards;
+    }
+    @keyframes deal {
+      from { transform: translate(-300px, -250px) rotate(-30deg); opacity: 0; }
+    }
+    @keyframes pop {
+      from { transform: scale(0.3); opacity: 0; }
+    }
+    .cf {
+      position: absolute;
+      top: -20px;
+      width: 10px;
+      height: 16px;
+      animation: fall 2.6s linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(600px) rotate(720deg); }
+    }
+    .bub {
+      position: absolute;
+      z-index: 15;
+      background: #fff;
+      color: #111;
+      border: 2px solid var(--gold);
+      font-weight: 900;
+      font-size: 14px;
+      padding: 4px 12px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px #0007;
+      animation: up 1.3s forwards;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    @keyframes up {
+      from { opacity: 0; transform: translateY(8px); }
+      15% { opacity: 1; }
+      to { opacity: 0; transform: translateY(-26px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .card, .shake, .bub, .cf, .room, #ov > div { transition: none; animation: none; }
+      #pile.fly .card, #hand.deal .card { animation: none; }
+    }
+  </style>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <div id="lobi" class="abs">← LOBI</div>
+    <button id="bSnd" class="abs" title="Suara">🔊</button>
+    <div id="tname" class="abs top"></div>
+    <div class="abs top hud-right">
+      <span style="color:#fde047">★ Gratis</span>
+      <span>|</span>
+      <span id="timer">Waktu 30s</span>
+    </div>
+
+    <div id="table" class="abs"></div>
+    <div id="ring" class="abs"></div>
+    <div id="tableBrand" class="abs">CAPSA BANTING · VIP TABLE</div>
+    <div id="suits" class="abs"><span class="r">♦</span><span class="k">♣</span><span class="r">♥</span><span class="k">♠</span></div>
+
+    <div id="pile" class="abs"></div>
+    <div id="who" class="abs"></div>
+    <div id="msg" class="abs"></div>
+    <div id="comboHint" class="abs"></div>
+
+    <button id="bSort" class="btn abs" style="left:372px;top:372px">URUT JENIS</button>
+    <button id="bPass" class="btn abs" style="left:527px;top:372px">PASS</button>
+    <button id="bPlay" class="btn abs" style="left:682px;top:372px">KELUARKAN</button>
+
+    <div id="hand" class="abs"></div>
+    <div id="cv">
+      <h2 id="cvT"></h2>
+      <p id="cvP"></p>
+      <button class="btn" id="cvB">Lihat kartu</button>
+    </div>
+    <div id="lobby"></div>
+    <div id="ov">
+      <div>
+        <h2 id="ovT"></h2>
+        <div id="ovB"></div>
+        <button class="btn" id="bAgain">Main lagi</button>
+        <button class="btn" id="bLobby">Ke lobi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DONATE_URL = 'https://saweria.co/hywavess';
+const $ = id => document.getElementById(id);
+const S = '♦♣♥♠';
+const RN = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A', 15: '2' };
+const rk = r => RN[r] || r;
+
+const BOT = ['Ivey', 'Bicknell', 'Hellmuth'];
+const HE_POOL = ['😀', '😎', '🤠', '🥳', '🦊', '🐯', '👑', '🤖'];
+let playerAvIdx = 0;
+let playerName = 'Kamu';
+const BE = ['🧑‍🦱', '👩', '🤓'];
+
+const LEVELS = [
+  { n: 'NOVICE',       m: 975, d: 'Santai & Ramah Pemula', ico: '🌱', pp: 0.35 },
+  { n: 'AMATEUR',      m: 412, d: 'Tantangan Menengah',   ico: '🔥', pp: 0.20 },
+  { n: 'PROFESSIONAL', m: 208, d: 'Strategi Tajam',       ico: '💎', pp: 0.08 },
+  { n: 'HIGH ROLLER',  m: 77,  d: 'Meja Master Tanpa Ampun', ico: '👑', pp: 0 }
+];
+
+const POS = [
+  { a: [65, 402] },
+  { a: [88, 68], b: [42, 202] },
+  { a: [390, 26], b: [524, 96] },
+  { a: [1042, 68], b: [1028, 202] }
+];
+
+let hands, turn = -1, last, passes, first, over = true, sel = new Set(), mode = 'suit';
+let tmr, left, B = 3, ACT = [0, 1, 2, 3], LOW = 12, LV = 0, V = 0, covered = false, gid = 0, AC, snd = true;
+
+const nm = i => i ? BOT[i - 1] : (playerName || 'Kamu');
+const em = i => i ? BE[i - 1] : HE_POOL[playerAvIdx];
+const nx = p => ACT[(ACT.indexOf(p) + 1) % ACT.length];
+
+/* ==================== WEB AUDIO SYNTH ==================== */
+function ac() {
+  AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state == 'suspended') AC.resume();
+  return AC;
+}
+function tone(f, d, ty = 'sine', v = 0.12, at = 0, f2) {
+  if (!snd) return;
+  try {
+    const a = ac(), o = a.createOscillator(), g = a.createGain(), t = a.currentTime + at;
+    o.type = ty;
+    o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(v, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + d);
+    o.connect(g);
+    g.connect(a.destination);
+    o.start(t);
+    o.stop(t + d);
+  } catch (e) {}
+}
+function nz(d, v, at = 0) {
+  if (!snd) return;
+  try {
+    const a = ac(), n = a.sampleRate * d | 0, b = a.createBuffer(1, n, a.sampleRate), x = b.getChannelData(0);
+    for (let i = 0; i < n; i++) x[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    f.type = 'highpass';
+    f.frequency.value = 1500;
+    g.gain.value = v;
+    s.buffer = b;
+    s.connect(f);
+    f.connect(g);
+    g.connect(a.destination);
+    s.start(a.currentTime + at);
+  } catch (e) {}
+}
+function sfx(k) {
+  ({
+    click: () => tone(660, 0.07, 'triangle', 0.1),
+    sel: () => tone(520, 0.05, 'triangle', 0.08),
+    play: () => { nz(0.08, 0.5); tone(180, 0.1, 'sine', 0.15, 0, 90); },
+    pass: () => tone(330, 0.18, 'triangle', 0.1, 0, 220),
+    bad: () => tone(130, 0.25, 'sawtooth', 0.1),
+    ding: () => { tone(880, 0.12, 'sine', 0.1); tone(1320, 0.18, 'sine', 0.08, 0.1); },
+    win: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.25, 'triangle', 0.14, i * 0.12)),
+    lose: () => [392, 330, 262, 196].forEach((f, i) => tone(f, 0.35, 'sawtooth', 0.07, i * 0.2))
+  }[k] || (() => {}))();
+}
+
+const stage = $('stage');
+function fit() {
+  const w = $('wrap'), s = Math.min(w.clientWidth / 1200, w.clientHeight / 540);
+  stage.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit);
+fit();
+
+/* ==================== SEATS SETUP ==================== */
+const seats = [];
+for (let q = 0; q < 4; q++) {
+  const p = POS[q], a = document.createElement('div');
+  a.className = 'abs';
+  a.style.cssText = 'left:' + p.a[0] + 'px;top:' + p.a[1] + 'px';
+  a.innerHTML = '<div class="av"></div><div class="lb"></div>';
+  stage.append(a);
+  seats[q] = { a };
+  if (q) {
+    const b = document.createElement('div');
+    b.className = 'abs bk';
+    b.style.cssText = 'left:' + p.b[0] + 'px;top:' + p.b[1] + 'px';
+    b.innerHTML = '<span></span>';
+    stage.append(b);
+    seats[q].b = b;
+  }
+}
+$('table').after($('ring'));
+
+function bub(i, t) {
+  const p = POS[(i - V + 4) % 4].a, s = document.createElement('span');
+  s.className = 'bub';
+  s.textContent = t;
+  s.style.cssText = 'left:' + (p[0] + 78) + 'px;top:' + (p[1] + 8) + 'px';
+  stage.append(s);
+  setTimeout(() => s.remove(), 1300);
+}
+
+function finish(w) {
+  sfx(w ? 'win' : 'lose');
+  if (w) {
+    const o = $('ov');
+    for (let i = 0; i < 65; i++) {
+      const s = document.createElement('span');
+      s.className = 'cf';
+      s.style.cssText = 'left:' + Math.random() * 100 + '%;background:hsl(' + Math.random() * 360 + ',90%,60%);animation-delay:' + Math.random() * 0.8 + 's';
+      o.append(s);
+    }
+  }
+}
+
+/* ==================== CARD EVALUATION & RENDERING ==================== */
+function card(c) {
+  return '<div class="card ' + (c.s % 2 ? 'k' : 'r') + '" data-v="' + c.v + '"><b>' + rk(c.r) + '</b><i>' + S[c.s] + '</i><u>' + S[c.s] + '</u></div>';
+}
+
+function evalC(c) {
+  const n = c.length;
+  if (!n) return null;
+  const s = [...c].sort((a, b) => a.v - b.v), t = s[n - 1];
+  if (n == 1) return { n, score: t.v, t: 'Satu kartu' };
+  const same = s.every(x => x.r == s[0].r);
+  if (n == 2 || n == 3) return same ? { n, score: n == 2 ? t.v : t.r, t: n == 2 ? 'Pair' : 'Three of a Kind' } : null;
+  if (n != 5) return null;
+  const cnt = {};
+  s.forEach(x => cnt[x.r] = (cnt[x.r] || 0) + 1);
+  const cs = Object.entries(cnt).map(([r, k]) => [+r, k]).sort((a, b) => b[1] - a[1]);
+  const fl = s.every(x => x.s == s[0].s), st = s.every((x, i) => !i || x.r == s[i - 1].r + 1);
+  if (st && fl) return { n, score: 5000 + t.v, t: 'Straight Flush' };
+  if (cs[0][1] == 4) return { n, score: 4000 + cs[0][0], t: 'Four of a Kind' };
+  if (cs[0][1] == 3 && cs[1] && cs[1][1] == 2) return { n, score: 3000 + cs[0][0], t: 'Full House' };
+  if (fl) return { n, score: 2000 + t.v, t: 'Flush' };
+  if (st) return { n, score: 1000 + t.v, t: 'Straight' };
+  return null;
+}
+
+function legal(c) {
+  const e = evalC(c);
+  if (!e) return null;
+  if (first && !c.some(x => x.v == LOW)) return null;
+  if (last && (e.n != last.e.n || e.score <= last.e.score)) return null;
+  return e;
+}
+
+function comb(a, k, f, st = 0, cur = []) {
+  if (cur.length == k) { f(cur.slice()); return; }
+  for (let i = st; i < a.length; i++) {
+    cur.push(a[i]);
+    comb(a, k, f, i + 1, cur);
+    cur.pop();
+  }
+}
+
+function msg(t) { $('msg').textContent = t; }
+const sorted = h => [...h].sort(mode == 'suit' ? (a, b) => a.s - b.s || a.r - b.r : (a, b) => a.v - b.v);
+const canAct = () => !over && turn == 0;
+
+function render() {
+  for (let q = 0; q < 4; q++) {
+    const i = q, e = seats[q], on = ACT.includes(i);
+    e.a.style.display = on ? '' : 'none';
+    if (e.b) e.b.style.display = on ? '' : 'none';
+    if (!on) continue;
+    e.a.firstChild.classList.toggle('on', turn == i && !over);
+    e.a.firstChild.textContent = em(i);
+    e.a.lastChild.textContent = nm(i) + (q ? '' : ' · ' + hands[i].length + ' kartu');
+    if (q) e.b.firstChild.textContent = hands[i].length;
+  }
+
+  $('hand').innerHTML = sorted(hands[V]).map((c, i) => card(c).replace('<div', '<div style="animation-delay:' + i * 45 + 'ms"')).join('');
+  $('hand').querySelectorAll('.card').forEach(el => {
+    if (sel.has(+el.dataset.v)) el.classList.add('sel');
+  });
+
+  const pl = $('pile'), fl = last && !last.shown;
+  if (last) last.shown = true;
+  if (fl) {
+    const v = [[0, 220], [-330, -100], [40, -200], [330, -100]][(last.by - V + 4) % 4];
+    pl.style.setProperty('--dx', v[0] + 'px');
+    pl.style.setProperty('--dy', v[1] + 'px');
+  }
+  pl.className = 'abs' + (fl ? ' fly' : '');
+  pl.innerHTML = last ? last.cards.sort((a, b) => a.v - b.v).map(card).join('') : '';
+  $('who').textContent = last ? nm(last.by) + ' · ' + last.e.t : '';
+
+  const mine = canAct();
+  const selCards = hands[V].filter(c => sel.has(c.v));
+  const evSel = evalC(selCards);
+  const legSel = legal(selCards);
+
+  // Live combination preview badge
+  const ch = $('comboHint');
+  if (selCards.length > 0 && mine) {
+    ch.classList.add('on');
+    if (legSel) {
+      ch.textContent = '✨ Siap Keluar: ' + legSel.t;
+      ch.style.borderColor = '#4ade80';
+      ch.style.color = '#86efac';
+    } else if (evSel) {
+      ch.textContent = '⚠️ ' + evSel.t + (first ? ' (Harus memuat kartu terkecil)' : ' (Belum mengalahkan meja)');
+      ch.style.borderColor = '#f87171';
+      ch.style.color = '#fca5a5';
+    } else {
+      ch.textContent = '❌ Kombinasi tidak valid (' + selCards.length + ' kartu)';
+      ch.style.borderColor = '#f87171';
+      ch.style.color = '#fca5a5';
+    }
+  } else {
+    ch.classList.remove('on');
+  }
+
+  $('bPass').classList.toggle('ok', mine && !!last);
+  $('bPlay').classList.toggle('ok', mine && !!legSel);
+}
+
+/* ==================== TURN & GAME LOOP ==================== */
+function setTurn(p) {
+  turn = p;
+  clearInterval(tmr);
+  begin(p);
+}
+
+function begin(p) {
+  left = 30;
+  tick();
+  clearInterval(tmr);
+  tmr = setInterval(() => {
+    left--;
+    tick();
+    if (left <= 0) {
+      clearInterval(tmr);
+      timeout();
+    }
+  }, 1000);
+  render();
+  if (p == 0) sfx('ding');
+  const g = gid;
+  if (p > 0) setTimeout(() => { if (g == gid && turn == p && !over) bot(p); }, 2000 + Math.random() * 1600);
+}
+
+function tick() {
+  const el = $('timer');
+  el.textContent = 'Waktu ' + Math.max(left, 0) + 's';
+  el.classList.toggle('warn', turn == 0 && left <= 7 && left > 0);
+  if (turn == 0 && left <= 5 && left > 0) tone(900, 0.08, 'square', 0.05);
+}
+
+function timeout() {
+  if (turn != 0 || over) return;
+  if (last) return doPass(turn);
+  play(turn, [[...hands[turn]].sort((a, b) => a.v - b.v)[0]]);
+}
+
+function doPass(p) {
+  if (!last) return;
+  passes++;
+  bub(p, 'PASS');
+  sfx('pass');
+  if (passes >= ACT.length - 1) {
+    const w = last.by;
+    last = null;
+    passes = 0;
+    msg(nm(p) + ' pass · ' + nm(w) + ' jalan bebas');
+    setTurn(w);
+  } else {
+    msg(nm(p) + ' pass');
+    setTurn(nx(p));
+  }
+}
+
+function play(p, cards) {
+  hands[p] = hands[p].filter(c => !cards.includes(c));
+  last = { cards, e: evalC(cards), by: p };
+  passes = 0;
+  first = false;
+  sel.clear();
+  msg('');
+  sfx('play');
+  bub(p, last.e.t);
+  if (!hands[p].length) {
+    render();
+    return end(p);
+  }
+  setTurn(nx(p));
+}
+
+function bot(p) {
+  const h = hands[p], all = [];
+  for (const k of [1, 2, 3, 5]) comb(h, k, c => { const e = legal(c); if (e) all.push({ c, e }); });
+  if (!all.length) {
+    if (last) doPass(p);
+    return;
+  }
+  let pick;
+  const mn = c => Math.min(...c.map(x => x.v));
+  if (last) {
+    if (h.length > 3 && Math.random() < LEVELS[LV].pp) return doPass(p);
+    all.sort((a, b) => a.e.score - b.e.score);
+    pick = all[0];
+    if (LV > 0 && h.length > 6 && (pick.c.some(x => x.r == 15) || pick.e.n == 5) && Math.random() < 0.4) return doPass(p);
+  } else if (LV == 0) {
+    pick = all[Math.random() * all.length | 0];
+  } else {
+    all.sort((a, b) => mn(a.c) - mn(b.c) || (LV > 1 ? b.e.n - a.e.n : a.e.n - b.e.n) || a.e.score - b.e.score);
+    pick = all[0];
+  }
+  play(p, pick.c);
+}
+
+function end(p) {
+  const g0 = gid, win = p == 0;
+  over = true;
+  clearInterval(tmr);
+  $('ovT').textContent = win ? '🎉 Kamu Menang!' : nm(p) + ' Menang!';
+  $('ovB').innerHTML = ACT.filter(i => i != p).map(i => '<p>' + em(i) + ' ' + nm(i) + ': sisa <b>' + hands[i].length + '</b> kartu</p>').join('');
+  render();
+  setTimeout(() => {
+    if (gid != g0) return;
+    $('ov').firstChild.className = win ? '' : 'lose';
+    $('ov').style.display = 'flex';
+    finish(win);
+  }, 850);
+}
+
+function deal() {
+  let d;
+  do {
+    d = [];
+    for (let r = 3; r <= 15; r++) for (let s = 0; s < 4; s++) d.push({ r, s, v: r * 4 + s });
+    for (let i = 51; i > 0; i--) {
+      const j = Math.random() * (i + 1) | 0;
+      [d[i], d[j]] = [d[j], d[i]];
+    }
+    hands = [0, 1, 2, 3].map(i => ACT.includes(i) ? d.splice(0, 13) : []);
+  } while (new Set(hands.flat().map(c => c.v)).size != 13 * ACT.length || ACT.some(i => hands[i].length != 13));
+}
+
+function start() {
+  gid++;
+  deal();
+  last = null;
+  passes = 0;
+  first = true;
+  over = false;
+  sel.clear();
+  covered = false;
+  $('cv').style.display = 'none';
+  $('ov').style.display = 'none';
+  $('ov').querySelectorAll('span').forEach(s => s.remove());
+  LOW = Math.min(...hands.flat().map(c => c.v));
+  const t = hands.findIndex(h => h.some(c => c.v == LOW));
+  V = 0;
+  turn = t;
+  msg(nm(t) + ' mulai dengan ' + rk(LOW >> 2) + S[LOW & 3]);
+  $('hand').className = 'abs deal';
+  setTimeout(() => $('hand').className = 'abs', 1300);
+  for (let i = 0; i < 13; i++) nz(0.05, 0.3, i * 0.045);
+  render();
+  setTurn(t);
+}
+
+/* ==================== ENHANCED LOBBY RENDER ==================== */
+function buildBgCards() {
+  const sample = [
+    { r: 'A', s: '♠', k: 1 }, { r: 'K', s: '♥', k: 0 }, { r: '2', s: '♠', k: 1 },
+    { r: 'Q', s: '♦', k: 0 }, { r: 'J', s: '♣', k: 1 }, { r: '10', s: '♥', k: 0 }
+  ];
+  let out = '';
+  for (let i = 0; i < 14; i++) {
+    const c = sample[i % sample.length];
+    const left = (i * 7.4) % 95;
+    const dur = 12 + (i % 5) * 2.5;
+    const del = -(i * 1.6);
+    out += `<div class="lob-fcard" style="left:${left}%;color:${c.k ? '#0f172a' : '#dc2626'};animation-duration:${dur}s;animation-delay:${del}s"><span>${c.r}</span><span>${c.s}</span></div>`;
+  }
+  return out;
+}
+
+const esc = s => s.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]);
+
+function showLobby() {
+  clearInterval(tmr);
+  gid++;
+  over = true;
+  turn = -1;
+  covered = false;
+  $('ov').style.display = 'none';
+  $('cv').style.display = 'none';
+
+  const L = $('lobby');
+  L.innerHTML = `
+    <div class="lob-bg-cards">${buildBgCards()}</div>
+    <div class="lob-header">
+      <div class="lob-badge">♦ ♣ CAPSA BANTING EDITION ♥ ♠</div>
+      <h1>POKER-IN</h1>
+    </div>
+
+    <div class="lob-setup">
+      <div class="prof-box" title="Klik avatar untuk ganti karakter">
+        <div class="prof-av" id="profAv">${HE_POOL[playerAvIdx]}</div>
+        <input class="prof-in" id="profName" maxlength="11" value="${esc(playerName)}" placeholder="Namamu">
+      </div>
+      <div class="ps">
+        <span>🤖 Jumlah Lawan:</span>
+        ${[1, 2, 3].map(n => `<button class="pn${n == B ? ' on' : ''}" data-n="${n}">${n}</button>`).join('')}
+      </div>
+    </div>
+
+    <div id="pcap"></div>
+
+    <div id="rooms">
+      ${LEVELS.map((r, i) => `
+        <button class="room" data-i="${i}">
+          <div class="room-ico">${r.ico}</div>
+          <div class="room-info">
+            <strong>${r.n} · Meja ${r.m}</strong>
+            <span>${r.d} · Gratis</span>
+          </div>
+          <div class="room-go">MAIN ▶</div>
+        </button>
+      `).join('')}
+    </div>
+
+    <div id="abt">
+      <div id="abtp">
+        <button class="tg" data-t="t1">📖 Aturan Main</button>
+        <button class="tg" data-t="t2">☕ Support ❤</button>
+        <div class="tc" id="t1">
+          <b>Capsa Banting (Big Two):</b> Habiskan 13 kartumu lebih dulu melawan 1–3 bot.<br>
+          • <b>Urutan Angka:</b> 3 terendah → K → A → <b>2 tertinggi</b>.<br>
+          • <b>Urutan Jenis:</b> ♦ (Wajik) &lt; ♣ (Keriting) &lt; ♥ (Hati) &lt; ♠ (Sekop).<br>
+          • <b>Kombinasi:</b> Satu kartu, Pair, Three of a Kind, dan 5 kartu (Straight, Flush, Full House, Four of a Kind, Straight Flush). Pemegang kartu terendah memulai giliran pertama.
+        </div>
+        <div class="tc" id="t2">
+          Game ini gratis dimainkan tanpa chip. Dukung developer lewat donasi:
+          ${DONATE_URL ? `<a href="${DONATE_URL}" target="_blank" rel="noopener">Donasi sekarang ↗</a>` : '<br>Tautan donasi belum diatur.'}
+        </div>
+      </div>
+      <button class="tg" data-t="abtp">ℹ Tentang & Aturan</button>
+    </div>
+  `;
+
+  $('profAv').onclick = () => {
+    playerAvIdx = (playerAvIdx + 1) % HE_POOL.length;
+    $('profAv').textContent = HE_POOL[playerAvIdx];
+    sfx('click');
+  };
+  $('profName').oninput = e => {
+    playerName = e.target.value.trim() || 'Kamu';
+  };
+
+  cap();
+  L.style.display = 'flex';
+}
+
+function cap() {
+  const bots = ACT.filter(i => i > 0).map(i => `${BE[i - 1]} ${BOT[i - 1]}`).join('  ·  ');
+  $('pcap').textContent = `Total ${B + 1} pemain (13 kartu/pemain) — Lawanmu: ${bots}`;
+}
+
+$('lobby').addEventListener('click', e => {
+  const t = e.target;
+  let b;
+  if (b = t.closest('.pn')) {
+    B = +b.dataset.n;
+    ACT = [[0, 2], [0, 1, 3], [0, 1, 2, 3]][B - 1];
+    document.querySelectorAll('.pn').forEach(x => x.classList.toggle('on', x == b));
+    cap();
+    sfx('click');
+  } else if (b = t.closest('.room')) {
+    LV = +b.dataset.i;
+    $('tname').textContent = LEVELS[LV].ico + ' ' + LEVELS[LV].n + ' · Meja ' + LEVELS[LV].m;
+    $('lobby').style.display = 'none';
+    sfx('click');
+    start();
+  } else if (b = t.closest('.tg')) {
+    const x = $(b.dataset.t);
+    x.style.display = x.style.display == 'block' ? 'none' : 'block';
+    sfx('click');
+  }
+});
+
+$('hand').addEventListener('click', e => {
+  const el = e.target.closest('.card');
+  if (!el || !canAct()) return;
+  const v = +el.dataset.v;
+  sfx('sel');
+  sel.has(v) ? sel.delete(v) : sel.add(v);
+  render();
+});
+
+$('bSort').onclick = () => {
+  mode = mode == 'suit' ? 'rank' : 'suit';
+  $('bSort').textContent = mode == 'suit' ? 'URUT JENIS' : 'URUT ANGKA';
+  sfx('click');
+  if (hands) render();
+};
+
+$('bPass').onclick = () => {
+  if (!canAct() || !last) return;
+  doPass(turn);
+};
+
+$('bPlay').onclick = () => {
+  if (!canAct()) return;
+  const c = hands[V].filter(x => sel.has(x.v));
+  if (!legal(c)) {
+    sfx('bad');
+    msg(first ? 'Kartu pertama harus memuat ' + rk(LOW >> 2) + S[LOW & 3] : 'Kombinasi tidak valid atau kurang tinggi');
+    const m = $('msg');
+    m.classList.remove('shake');
+    void m.offsetWidth;
+    m.classList.add('shake');
+    return;
+  }
+  play(V, c);
+};
+
+$('lobi').onclick = () => { sfx('click'); showLobby(); };
+$('bSnd').onclick = () => { snd = !snd; $('bSnd').textContent = snd ? '🔊' : '🔇'; sfx('click'); };
+$('bAgain').onclick = () => { sfx('click'); start(); };
+$('bLobby').onclick = () => { sfx('click'); showLobby(); };
+
+showLobby();
+</script>
+</body>
+</html>
