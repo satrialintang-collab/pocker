@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Capsa Banting</title>
+<style>
+:root{--bg:#0b6a9c;--bg2:#074566;--gold:#f0c060;--felt:#6b70a6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#08547c;--bg2:#052f47}}
+:root[data-theme="dark"]{--bg:#08547c;--bg2:#052f47}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(circle at 50% 40%,var(--bg),var(--bg2));overflow:hidden;font-family:"Trebuchet MS","Segoe UI",Arial,sans-serif;color:#fff;user-select:none}
+#wrap{position:fixed;inset:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px) 0;display:flex;align-items:center;justify-content:center}
+#stage{width:1200px;height:540px;position:relative;flex:none;overflow:hidden}
+.abs{position:absolute}
+#table{left:140px;top:60px;width:920px;height:360px;border-radius:180px;border:12px solid var(--gold);background:radial-gradient(ellipse,#8a8fc2,var(--felt));box-shadow:0 10px 30px #0006,inset 0 0 40px #0005;box-sizing:border-box}
+#ring{left:260px;top:105px;width:680px;height:260px;border-radius:130px;border:2px solid #fff3}
+#suits{left:555px;top:46px;width:90px;text-align:center;color:#e33;letter-spacing:3px;font-size:16px}
+.top{font-weight:800;font-size:22px;text-shadow:0 2px 3px #0008}
+#lobi{left:20px;top:10px;padding:6px 36px;border-radius:20px;background:linear-gradient(#4a7bd6,#2b4fa8);border:2px solid #fff6;font-weight:800;font-size:18px;cursor:pointer}
+#bSnd{right:12px;top:6px;z-index:30;background:#0006;border:2px solid #fff5;border-radius:50%;width:38px;height:38px;font-size:18px;cursor:pointer;color:#fff}
+.av{width:70px;height:70px;border-radius:50%;border:5px solid var(--gold);background:#cfe6f3;display:flex;align-items:center;justify-content:center;font-size:38px;box-sizing:border-box}
+.av.on{box-shadow:0 0 0 4px #ffe066,0 0 24px #ffe066}
+.lb{text-align:center;font-weight:800;font-size:15px;text-shadow:0 1px 3px #000;white-space:nowrap;width:130px;margin-left:-30px}
+.bk{width:140px;height:62px;border-radius:6px;background:repeating-linear-gradient(45deg,#5a6bb0 0 4px,#8496da 4px 8px);box-shadow:3px 3px 0 #3b4a8c,0 6px 10px #0005;display:flex;align-items:center;justify-content:center}
+.bk span{background:#000a;border-radius:12px;padding:2px 12px;font-size:20px;font-weight:800}
+.btn{width:140px;height:44px;border-radius:22px;border:3px solid #fff5;font:800 17px "Trebuchet MS",Arial,sans-serif;color:#fff;cursor:pointer;background:#555;opacity:.55;text-shadow:0 2px 2px #0008}
+.btn.ok{opacity:1}
+#bSort{background:linear-gradient(90deg,#3a6df0,#2bc9a4);opacity:1}
+#bPlay.ok{background:linear-gradient(#f5b63a,#d8861b)}
+#bPass.ok{background:linear-gradient(#e0624d,#b53a28)}
+#pile{left:450px;width:300px;top:168px;height:100px;display:flex;justify-content:center;align-items:center}
+#msg{left:350px;width:500px;top:300px;text-align:center;font-weight:700;font-size:16px;text-shadow:0 1px 3px #000}
+#who{left:450px;width:300px;top:272px;text-align:center;font-weight:800;color:#ffe9a8;font-size:15px}
+#hand{left:270px;top:422px;width:700px;height:118px;display:flex}
+.card{width:80px;height:112px;background:#fff;border-radius:8px;position:relative;flex:none;box-shadow:0 2px 6px #0007;transition:transform .12s;font-family:Georgia,"Times New Roman",serif}
+#hand .card{margin-left:-32px;cursor:pointer}
+#hand .card:first-child{margin-left:0}
+#hand .card.sel{transform:translateY(-22px);box-shadow:0 0 0 3px #ffd24a,0 4px 10px #0007}
+.card.r{color:#d92b2b}.card.k{color:#14141c}
+.card b{position:absolute;left:7px;top:2px;font-size:30px;line-height:1.1}
+.card i{position:absolute;left:9px;top:34px;font-style:normal;font-size:20px}
+.card u{position:absolute;right:8px;bottom:4px;text-decoration:none;font-size:48px;line-height:1}
+#pile .card{margin-left:-28px;zoom:.8}#pile .card:first-child{margin-left:0}
+#ov,#cv{display:none;position:absolute;inset:0;align-items:center;justify-content:center}
+#ov{background:#000b;z-index:9}
+#cv{z-index:15;flex-direction:column;text-align:center;background:linear-gradient(var(--bg2),#021a2a)}
+#cv h2{font-size:38px;margin:0 0 8px;color:#ffd24a}#cv p{margin:0 0 18px;font-size:18px}
+#cv .btn,#ov .btn{width:200px;opacity:1;background:linear-gradient(#f5b63a,#d8861b)}
+#ov>div{animation:pop .5s cubic-bezier(.2,1.4,.4,1);background:#12203f;border:3px solid var(--gold);border-radius:18px;padding:26px 44px;text-align:center;min-width:300px}
+#ov h2{margin:0 0 12px;font-size:30px;color:#ffd24a}
+#ov p{margin:6px 0;font-size:18px}
+#ov .btn{display:block;margin:12px auto 0}#ov #bLobby{background:linear-gradient(#4a7bd6,#2b4fa8)}
+#ov>div.lose{border-color:#c0392b;animation:pop .5s cubic-bezier(.2,1.4,.4,1),sh .5s .5s}#ov>div.lose h2{color:#ff6b5a}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#lobby{position:absolute;inset:0;z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,var(--bg),var(--bg2))}
+#lobby h1{margin:0 0 6px;font-size:54px;letter-spacing:2px;color:var(--gold);text-shadow:0 4px 0 #7a4b10,0 8px 14px #0008}
+.ps{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800}
+.pn{width:46px;height:46px;border-radius:50%;border:3px solid #fff5;background:#27407f;color:#fff;font:800 20px "Trebuchet MS",Arial,sans-serif;cursor:pointer}
+.pn.on{background:linear-gradient(#f5b63a,#d8861b);border-color:#fff}
+#pcap{margin:4px 0 14px;font-size:14px;color:#cfe6f3}
+#rooms{display:grid;grid-template-columns:repeat(2,330px);gap:14px}
+.room{display:flex;flex-direction:column;gap:2px;text-align:left;padding:12px 18px;border-radius:16px;border:3px solid var(--gold);background:linear-gradient(#3b5ea8,#27407f);color:#fff;font:600 15px "Trebuchet MS",Arial,sans-serif;cursor:pointer;transition:transform .12s}
+.room strong{font-size:20px}.room:hover{filter:brightness(1.15);transform:translateY(-2px)}
+.tg{padding:8px 18px;border-radius:18px;border:2px solid #fff5;background:#27407f;color:#fff;font:700 15px "Trebuchet MS",Arial,sans-serif;cursor:pointer}
+#abt{position:absolute;left:24px;bottom:16px}
+#abtp{display:none;position:absolute;left:24px;bottom:62px;width:460px;background:#12203f;border:2px solid var(--gold);border-radius:14px;padding:12px;font-size:14px;line-height:1.5;text-align:left}
+.tc{display:none;margin:8px 0 6px;padding:8px 12px;background:#0004;border-radius:10px}
+.tc a{color:#ffd24a;font-weight:800}
+#pile.fly .card{animation:drop .4s cubic-bezier(.2,.8,.3,1)}
+@keyframes drop{from{transform:translate(var(--dx),var(--dy)) rotate(25deg) scale(1.2);opacity:0}to{transform:none;opacity:1}}
+#hand.deal .card{animation:deal .5s backwards}
+@keyframes deal{from{transform:translate(-300px,-250px) rotate(-30deg);opacity:0}}
+@keyframes pop{from{transform:scale(.3);opacity:0}}
+.cf{position:absolute;top:-20px;width:10px;height:16px;animation:fall 2.6s linear forwards}
+@keyframes fall{to{transform:translateY(600px) rotate(720deg)}}
+.bub{position:absolute;z-index:5;background:#fff;color:#222;font-weight:800;font-size:15px;padding:4px 12px;border-radius:14px;animation:up 1.3s forwards;pointer-events:none;white-space:nowrap}
+@keyframes up{from{opacity:0;transform:translateY(8px)}15%{opacity:1}to{opacity:0;transform:translateY(-26px)}}
+@media (prefers-reduced-motion:reduce){.card,.shake,.bub,.cf,.room,#ov>div{transition:none;animation:none}#pile.fly .card,#hand.deal .card{animation:none}}
+</style></head><body>
+<div id="wrap"><div id="stage">
+ <div id="lobi" class="abs">LOBI</div><button id="bSnd" class="abs" title="Suara">🔊</button>
+ <div id="tname" class="abs top" style="left:190px;top:12px"></div>
+ <div class="abs top" style="right:60px;top:12px;color:#ffd24a">Gratis&nbsp;&nbsp;<span id="timer" style="color:#6fd3ff">Waktu 30s</span></div>
+ <div id="table" class="abs"></div><div id="ring" class="abs"></div>
+ <div id="suits" class="abs">♦♥♠♣</div>
+ <div id="pile" class="abs"></div><div id="who" class="abs"></div><div id="msg" class="abs"></div>
+ <button id="bSort" class="btn abs" style="left:378px;top:372px">URUT JENIS</button>
+ <button id="bPass" class="btn abs" style="left:530px;top:372px">PASS</button>
+ <button id="bPlay" class="btn abs" style="left:682px;top:372px">KELUARKAN</button>
+ <div id="hand" class="abs"></div>
+ <div id="cv"><h2 id="cvT"></h2><p id="cvP"></p><button class="btn" id="cvB">Lihat kartu</button></div>
+ <div id="lobby"></div>
+ <div id="ov"><div><h2 id="ovT"></h2><div id="ovB"></div><button class="btn" id="bAgain">Main lagi</button><button class="btn" id="bLobby">Ke lobi</button></div></div>
+</div></div>
+<script>
+const DONATE_URL='https://saweria.co/hywavess';
+const $=id=>document.getElementById(id),S='♦♣♥♠',RN={11:'J',12:'Q',13:'K',14:'A',15:'2'},rk=r=>RN[r]||r;
+const BOT=['Ivey','Bicknell','Hellmuth'],HE=['😀','😎','🤠','🥳'],BE=['🧑‍🦱','👩','🤓'];
+const LEVELS=[{n:'NOVICE',m:975,d:'EASY PEASY!',pp:.35},{n:'AMEATEUR',m:412,d:'OK',pp:.2},{n:'PROFESSIONAL',m:208,d:'ALRIGHT.',pp:.08},{n:'HIGH ROLLER',m:77,d:'YOO WTF?!',pp:0}];
+const POS=[{a:[70,405]},{a:[90,70],b:[40,205]},{a:[390,28],b:[520,98]},{a:[1040,70],b:[1030,205]}];
+let hands,turn=-1,last,passes,first,over=true,sel=new Set(),mode='suit',tmr,left,B=3,ACT=[0,1,2,3],LOW=12,LV=0,V=0,covered=false,gid=0,AC,snd=true;
+const nm=i=>i?BOT[i-1]:'Kamu',em=i=>i?BE[i-1]:HE[0],nx=p=>ACT[(ACT.indexOf(p)+1)%ACT.length];
+function ac(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume();return AC}
+function tone(f,d,ty='sine',v=.12,at=0,f2){if(!snd)return;try{const a=ac(),o=a.createOscillator(),g=a.createGain(),t=a.currentTime+at;o.type=ty;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d)}catch(e){}}
+function nz(d,v,at=0){if(!snd)return;try{const a=ac(),n=a.sampleRate*d|0,b=a.createBuffer(1,n,a.sampleRate),x=b.getChannelData(0);for(let i=0;i<n;i++)x[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();f.type='highpass';f.frequency.value=1500;g.gain.value=v;s.buffer=b;s.connect(f);f.connect(g);g.connect(a.destination);s.start(a.currentTime+at)}catch(e){}}
+function sfx(k){({click:()=>tone(660,.07,'triangle',.1),sel:()=>tone(520,.05,'triangle',.08),play:()=>{nz(.08,.5);tone(180,.1,'sine',.15,0,90)},pass:()=>tone(330,.18,'triangle',.1,0,220),bad:()=>tone(130,.25,'sawtooth',.1),ding:()=>{tone(880,.12,'sine',.1);tone(1320,.18,'sine',.08,.1)},win:()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,.25,'triangle',.14,i*.12)),lose:()=>[392,330,262,196].forEach((f,i)=>tone(f,.35,'sawtooth',.07,i*.2))}[k]||(()=>{}))()}
+const stage=$('stage');
+function fit(){const w=$('wrap'),s=Math.min(w.clientWidth/1200,w.clientHeight/540);stage.style.transform='scale('+s+')'}
+addEventListener('resize',fit);fit();
+const seats=[];
+for(let q=0;q<4;q++){const p=POS[q],a=document.createElement('div');a.className='abs';a.style.cssText='left:'+p.a[0]+'px;top:'+p.a[1]+'px';
+ a.innerHTML='<div class="av"></div><div class="lb"></div>';stage.append(a);seats[q]={a};
+ if(q){const b=document.createElement('div');b.className='abs bk';b.style.cssText='left:'+p.b[0]+'px;top:'+p.b[1]+'px';b.innerHTML='<span></span>';stage.append(b);seats[q].b=b}}
+$('table').after($('ring'));
+function bub(i,t){const p=POS[(i-V+4)%4].a,s=document.createElement('span');s.className='bub';s.textContent=t;s.style.cssText='left:'+(p[0]+78)+'px;top:'+(p[1]+8)+'px';stage.append(s);setTimeout(()=>s.remove(),1300)}
+function finish(w){sfx(w?'win':'lose');if(w){const o=$('ov');for(let i=0;i<60;i++){const s=document.createElement('span');s.className='cf';s.style.cssText='left:'+Math.random()*100+'%;background:hsl('+Math.random()*360+',90%,60%);animation-delay:'+Math.random()*.8+'s';o.append(s)}}}
+function card(c){return '<div class="card '+(c.s%2?'k':'r')+'" data-v="'+c.v+'"><b>'+rk(c.r)+'</b><i>'+S[c.s]+'</i><u>'+S[c.s]+'</u></div>'}
+function evalC(c){const n=c.length;if(!n)return null;const s=[...c].sort((a,b)=>a.v-b.v),t=s[n-1];
+ if(n==1)return{n,score:t.v,t:'Satu kartu'};
+ const same=s.every(x=>x.r==s[0].r);
+ if(n==2||n==3)return same?{n,score:n==2?t.v:t.r,t:n==2?'Pair':'Three of a Kind'}:null;
+ if(n!=5)return null;
+ const cnt={};s.forEach(x=>cnt[x.r]=(cnt[x.r]||0)+1);
+ const cs=Object.entries(cnt).map(([r,k])=>[+r,k]).sort((a,b)=>b[1]-a[1]);
+ const fl=s.every(x=>x.s==s[0].s),st=s.every((x,i)=>!i||x.r==s[i-1].r+1);
+ if(st&&fl)return{n,score:5000+t.v,t:'Straight Flush'};
+ if(cs[0][1]==4)return{n,score:4000+cs[0][0],t:'Four of a Kind'};
+ if(cs[0][1]==3&&cs[1]&&cs[1][1]==2)return{n,score:3000+cs[0][0],t:'Full House'};
+ if(fl)return{n,score:2000+t.v,t:'Flush'};
+ if(st)return{n,score:1000+t.v,t:'Straight'};
+ return null}
+function legal(c){const e=evalC(c);if(!e)return null;
+ if(first&&!c.some(x=>x.v==LOW))return null;
+ if(last&&(e.n!=last.e.n||e.score<=last.e.score))return null;return e}
+function comb(a,k,f,st=0,cur=[]){if(cur.length==k){f(cur.slice());return}
+ for(let i=st;i<a.length;i++){cur.push(a[i]);comb(a,k,f,i+1,cur);cur.pop()}}
+function msg(t){$('msg').textContent=t}
+const sorted=h=>[...h].sort(mode=='suit'?(a,b)=>a.s-b.s||a.r-b.r:(a,b)=>a.v-b.v);
+const canAct=()=>!over&&turn==0;
+function render(){
+ for(let q=0;q<4;q++){const i=q,e=seats[q],on=ACT.includes(i);e.a.style.display=on?'':'none';if(e.b)e.b.style.display=on?'':'none';if(!on)continue;
+  e.a.firstChild.classList.toggle('on',turn==i&&!over);e.a.firstChild.textContent=em(i);
+  e.a.lastChild.textContent=nm(i)+(q?'':' · '+hands[i].length+' kartu');
+  if(q)e.b.firstChild.textContent=hands[i].length}
+ $('hand').innerHTML=sorted(hands[V]).map((c,i)=>card(c).replace('<div','<div style="animation-delay:'+i*45+'ms"')).join('');
+ $('hand').querySelectorAll('.card').forEach(el=>{if(sel.has(+el.dataset.v))el.classList.add('sel')});
+ const pl=$('pile'),fl=last&&!last.shown;if(last)last.shown=true;
+ if(fl){const v=[[0,220],[-330,-100],[40,-200],[330,-100]][(last.by-V+4)%4];pl.style.setProperty('--dx',v[0]+'px');pl.style.setProperty('--dy',v[1]+'px')}
+ pl.className='abs'+(fl?' fly':'');
+ pl.innerHTML=last?last.cards.sort((a,b)=>a.v-b.v).map(card).join(''):'';
+ $('who').textContent=last?nm(last.by)+' · '+last.e.t:'';
+ const mine=canAct();
+ $('bPass').classList.toggle('ok',mine&&!!last);
+ $('bPlay').classList.toggle('ok',mine&&!!legal(hands[V].filter(c=>sel.has(c.v))));
+}
+function cover(p,cb){covered=true;clearInterval(tmr);$('cvT').textContent=nm(p)+', giliranmu!';$('cvP').textContent='Oper perangkat ke '+nm(p)+'. Pastikan pemain lain tidak melihat layar.';
+ $('cvB').onclick=()=>{covered=false;$('cv').style.display='none';sfx('click');render();cb()};$('cv').style.display='flex'}
+function setTurn(p){turn=p;clearInterval(tmr);
+ 
+ begin(p)}
+function begin(p){left=30;tick();clearInterval(tmr);
+ tmr=setInterval(()=>{left--;tick();if(left<=0){clearInterval(tmr);timeout()}},1000);
+ render();if(p==0)sfx('ding');const g=gid;
+ if(p>0)setTimeout(()=>{if(g==gid&&turn==p&&!over)bot(p)},2200+Math.random()*1800)}
+function tick(){$('timer').textContent='Waktu '+Math.max(left,0)+'s';if(turn==0&&left<=5&&left>0)tone(900,.08,'square',.05)}
+function timeout(){if(turn!=0||over)return;
+ if(last)return doPass(turn);
+ play(turn,[[...hands[turn]].sort((a,b)=>a.v-b.v)[0]])}
+function doPass(p){if(!last)return;passes++;bub(p,'PASS');sfx('pass');
+ if(passes>=ACT.length-1){const w=last.by;last=null;passes=0;msg(nm(p)+' pass · '+nm(w)+' jalan bebas');setTurn(w)}
+ else{msg(nm(p)+' pass');setTurn(nx(p))}}
+function play(p,cards){hands[p]=hands[p].filter(c=>!cards.includes(c));
+ last={cards,e:evalC(cards),by:p};passes=0;first=false;sel.clear();msg('');sfx('play');bub(p,last.e.t);
+ if(!hands[p].length){render();return end(p)}setTurn(nx(p));return;
+ setTurn((p+1)%4)}
+function bot(p){const h=hands[p],all=[];
+ for(const k of [1,2,3,5])comb(h,k,c=>{const e=legal(c);if(e)all.push({c,e})});
+ if(!all.length){if(last)doPass(p);return}
+ let pick;const mn=c=>Math.min(...c.map(x=>x.v));
+ if(last){if(h.length>3&&Math.random()<LEVELS[LV].pp)return doPass(p);
+  all.sort((a,b)=>a.e.score-b.e.score);pick=all[0];
+  if(LV>0&&h.length>6&&(pick.c.some(x=>x.r==15)||pick.e.n==5)&&Math.random()<.4)return doPass(p)}
+ else if(LV==0)pick=all[Math.random()*all.length|0];
+ else{all.sort((a,b)=>mn(a.c)-mn(b.c)||(LV>1?b.e.n-a.e.n:a.e.n-b.e.n)||a.e.score-b.e.score);pick=all[0]}
+ play(p,pick.c)}
+function end(p){const g0=gid,win=p==0;over=true;clearInterval(tmr);
+ $('ovT').textContent=win?'Kamu menang! 🎉':nm(p)+' menang · kamu kalah';
+ $('ovB').innerHTML=ACT.filter(i=>i!=p).map(i=>'<p>'+nm(i)+': sisa '+hands[i].length+' kartu</p>').join('');
+ render();setTimeout(()=>{if(gid!=g0)return;$('ov').firstChild.className=win?'':'lose';$('ov').style.display='flex';finish(win)},900)}
+function deal(){let d;do{d=[];for(let r=3;r<=15;r++)for(let s=0;s<4;s++)d.push({r,s,v:r*4+s});
+ for(let i=51;i>0;i--){const j=Math.random()*(i+1)|0;[d[i],d[j]]=[d[j],d[i]]}
+ hands=[0,1,2,3].map(i=>ACT.includes(i)?d.splice(0,13):[])}
+ while(new Set(hands.flat().map(c=>c.v)).size!=13*ACT.length||ACT.some(i=>hands[i].length!=13))}
+function start(){gid++;deal();last=null;passes=0;first=true;over=false;sel.clear();covered=false;
+ $('cv').style.display='none';$('ov').style.display='none';$('ov').querySelectorAll('span').forEach(s=>s.remove());
+ LOW=Math.min(...hands.flat().map(c=>c.v));const t=hands.findIndex(h=>h.some(c=>c.v==LOW));V=0;turn=t;msg(nm(t)+' mulai dengan '+rk(LOW>>2)+S[LOW&3]);
+ $('hand').className='abs deal';setTimeout(()=>$('hand').className='abs',1300);for(let i=0;i<13;i++)nz(.05,.3,i*.045);
+ render();setTurn(t)}
+function showLobby(){clearInterval(tmr);gid++;over=true;turn=-1;covered=false;$('ov').style.display='none';$('cv').style.display='none';
+ const L=$('lobby');
+ L.innerHTML='<h1>POKER-IN</h1><div class="ps"><span>Jumlah Lawan</span>'+[1,2,3].map(n=>'<button class="pn'+(n==B?' on':'')+'" data-n="'+n+'">'+n+'</button>').join('')+'</div><div id="pcap"></div><div id="rooms">'+LEVELS.map((r,i)=>'<button class="room" data-i="'+i+'"><strong>'+r.n+' · Meja '+r.m+'</strong><span>'+r.d+' · Terbuka · Gratis</span></button>').join('')+'</div>'
+ +'<div id="abt"><div id="abtp"><button class="tg" data-t="t1">Tentang Web</button> <button class="tg" data-t="t2">Support ❤</button>'
+ +'<div class="tc" id="t1">Poker / Capsa Banting adalah game kartu melawan 1 sampai 3 bot. Satu dek 52 kartu, masing-masing pemain mendapat 13 kartu. Habiskan kartumu lebih dulu untuk menang. Urutan angka: 3 terendah sampai K, lalu A, dan 2 tertinggi. Urutan jenis: ♦ &lt; ♣ &lt; ♥ &lt; ♠. Kombinasi: satu kartu, pair, tiga kartu sama, dan lima kartu (straight, flush, full house, four of a kind, straight flush). Pemegang kartu terendah (3♦ jika ikut terbagi) memulai dan kartu pertamanya harus memuat kartu itu. Gratis, tanpa chip, semua level terbuka. Dibuat @Hywavess dan disupport oleh Anthropic & Github.</div>'
+ +'<div class="tc" id="t2">Game ini gratis. Kalau kamu suka dan ingin mendukung pengembangannya, kamu bisa berdonasi. '+(DONATE_URL?'<a href="'+DONATE_URL+'" target="_blank" rel="noopener">Donasi sekarang</a>':'<br>Tautan donasi belum diatur.')+'</div></div>'
+ +'<button class="tg" data-t="abtp">ℹ About</button></div>';
+ cap();L.style.display='flex'}
+function cap(){$('pcap').textContent='Kamu melawan '+B+' bot · total '+(B+1)+' pemain, masing-masing 13 kartu'}
+$('lobby').addEventListener('click',e=>{const t=e.target;let b;
+ if(b=t.closest('.pn')){B=+b.dataset.n;ACT=[[0,2],[0,1,3],[0,1,2,3]][B-1];document.querySelectorAll('.pn').forEach(x=>x.classList.toggle('on',x==b));cap();sfx('click')}
+ else if(b=t.closest('.room')){LV=+b.dataset.i;$('tname').textContent=LEVELS[LV].n+' · Meja '+LEVELS[LV].m;$('lobby').style.display='none';sfx('click');start()}
+ else if(b=t.closest('.tg')){const x=$(b.dataset.t);x.style.display=x.style.display=='block'?'none':'block';sfx('click')}});
+$('hand').addEventListener('click',e=>{const el=e.target.closest('.card');if(!el||!canAct())return;
+ const v=+el.dataset.v;sfx('sel');sel.has(v)?sel.delete(v):sel.add(v);render()});
+$('bSort').onclick=()=>{mode=mode=='suit'?'rank':'suit';$('bSort').textContent=mode=='suit'?'URUT JENIS':'URUT ANGKA';if(hands)render()};
+$('bPass').onclick=()=>{if(!canAct()||!last)return;doPass(turn)};
+$('bPlay').onclick=()=>{if(!canAct())return;const c=hands[V].filter(x=>sel.has(x.v));
+ if(!legal(c)){sfx('bad');msg(first?'Kartu pertama harus memuat '+rk(LOW>>2)+S[LOW&3]:'Kombinasi tidak valid atau kurang tinggi');
+  const m=$('msg');m.classList.remove('shake');void m.offsetWidth;m.classList.add('shake');return}
+ play(V,c)};
+$('lobi').onclick=()=>{sfx('click');showLobby()};
+$('bSnd').onclick=()=>{snd=!snd;$('bSnd').textContent=snd?'🔊':'🔇';sfx('click')};
+$('bAgain').onclick=()=>{sfx('click');start()};
+$('bLobby').onclick=()=>{sfx('click');showLobby()};
+showLobby();
+</script></body></html>
